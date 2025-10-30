@@ -1,4 +1,17 @@
-from nba_api.stats.endpoints import playergamelog
+from nba_api.stats.endpoints import playergamelog, leagueleaders
+def get_league_leaders(stat_category):
+    """
+    Return league leaders for a given stat category (e.g., 'PTS', 'REB', 'AST').
+    See nba_api docs for valid stat_category values.
+    Returns a list of dicts with player info and stat value.
+    """
+    try:
+        leaders = leagueleaders.LeagueLeaders(stat_category_abbreviation=stat_category)
+        df = leaders.get_data_frames()[0]
+        return df.to_dict(orient='records')
+    except Exception as e:
+        print(f"Error fetching league leaders: {e}")
+        return []
 from nba_api.stats.static import players
 
 def get_active_players():
