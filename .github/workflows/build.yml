@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-mac:
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,12 +25,39 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build executable
+      - name: Build macOS executable
         run: |
-          pyinstaller src/main.py --onefile --distpath dist
+          pyinstaller src/main.py --onefile --distpath dist --name basketballApp-mac
 
-      - name: Upload executable
+      - name: Upload macOS executable
         uses: actions/upload-artifact@v4
         with:
-          name: basketballApp-executable
-          path: dist/main
+          name: basketballApp-mac
+          path: dist/basketballApp-mac
+
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Windows executable
+        run: |
+          pyinstaller src/main.py --onefile --distpath dist --name basketballApp-win.exe
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: basketballApp-win
+          path: dist/basketballApp-win.exe
