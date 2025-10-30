@@ -50,19 +50,38 @@ class PlayerListApp(QWidget):
         if player_id is not None:
             stats = get_most_recent_game_stats(player_id)
             if stats:
-                stats_str = '\n'.join([f"{k}: {v}" for k, v in stats.items()])
-                self.show_stats_popup(player_name, stats_str)
+                self.show_stats_popup(player_name, stats)
             else:
                 self.show_stats_popup(player_name, "No recent game data found.")
         else:
             self.show_stats_popup(player_name, "Player ID not found.")
 
-    def show_stats_popup(self, player_name, stats_str):
-        from PyQt6.QtWidgets import QMessageBox
-        msg = QMessageBox(self)
-        msg.setWindowTitle(f"{player_name} - Most Recent Game")
-        msg.setText(stats_str)
-        msg.exec()
+    def show_stats_popup(self, player_name, stats):
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QPushButton
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"{player_name} - Most Recent Game")
+        dialog.resize(600, 500)
+        layout = QVBoxLayout()
+        label = QLabel(f"Stats for {player_name}'s most recent game:")
+        layout.addWidget(label)
+        if isinstance(stats, str):
+            layout.addWidget(QLabel(stats))
+        else:
+            table = QTableWidget()
+            table.setRowCount(len(stats))
+            table.setColumnCount(2)
+            table.setHorizontalHeaderLabels(["Stat", "Value"])
+            table.setMinimumSize(550, 400)
+            for i, (k, v) in enumerate(stats.items()):
+                table.setItem(i, 0, QTableWidgetItem(str(k)))
+                table.setItem(i, 1, QTableWidgetItem(str(v)))
+            table.resizeColumnsToContents()
+            layout.addWidget(table)
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(dialog.accept)
+        layout.addWidget(close_btn)
+        dialog.setLayout(layout)
+        dialog.exec()
 
     def update_list(self):
         self.list_widget.clear()
