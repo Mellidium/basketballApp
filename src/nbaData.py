@@ -15,7 +15,7 @@ def get_player_id_by_name(name):
 def get_most_recent_game_stats(player_id):
     """Return stats for the most recent game for the given player ID. Returns None if not found."""
     try:
-        gamelog = playergamelog.PlayerGameLog(player_id=player_id, season='2023-24')
+        gamelog = playergamelog.PlayerGameLog(player_id=player_id, season='2025-26')
         df = gamelog.get_data_frames()[0]
         if not df.empty:
             return df.iloc[0].to_dict()
