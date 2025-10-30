@@ -40,7 +40,7 @@ class LeagueLeadersPage(QWidget):
         layout.addWidget(stats_label)
         
         # Create button grid for stat categories
-        button_grid = QHBoxLayout()
+        # Based on nba_api LeagueLeaders endpoint available stats
         self.stat_categories = {
             'PTS': 'Points',
             'REB': 'Rebounds',
@@ -49,16 +49,55 @@ class LeagueLeadersPage(QWidget):
             'BLK': 'Blocks',
             'FG_PCT': 'FG%',
             'FG3_PCT': '3P%',
-            'FT_PCT': 'FT%'
+            'FT_PCT': 'FT%',
+            'FG3M': '3PM',
+            'FTM': 'FTM',
+            'OREB': 'Off Reb',
+            'DREB': 'Def Reb',
+            'TOV': 'Turnovers',
+            'PF': 'Fouls',
+            'MIN': 'Minutes',
+            'FGM': 'FGM',
+            'FGA': 'FGA',
+            'FG3A': '3PA',
+            'FTA': 'FTA',
+            'EFF': 'Efficiency',
+            'AST_TOV': 'Ast/TO',
+            'STL_TOV': 'Stl/TO'
         }
         
-        # Create buttons for each stat category
-        for stat_abbr, stat_name in self.stat_categories.items():
+        # Create buttons for each stat category in multiple rows
+        button_row1 = QHBoxLayout()
+        button_row2 = QHBoxLayout()
+        button_row3 = QHBoxLayout()
+        
+        stat_items = list(self.stat_categories.items())
+        row_size = 8
+        
+        # First row (8 buttons)
+        for stat_abbr, stat_name in stat_items[:row_size]:
             btn = QPushButton(stat_name)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
-            button_grid.addWidget(btn)
+            button_row1.addWidget(btn)
         
-        layout.addLayout(button_grid)
+        # Second row (8 buttons)
+        for stat_abbr, stat_name in stat_items[row_size:row_size*2]:
+            btn = QPushButton(stat_name)
+            btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
+            button_row2.addWidget(btn)
+        
+        # Third row (remaining buttons)
+        for stat_abbr, stat_name in stat_items[row_size*2:]:
+            btn = QPushButton(stat_name)
+            btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
+            button_row3.addWidget(btn)
+        
+        # Add stretch to third row to align left
+        button_row3.addStretch(1)
+        
+        layout.addLayout(button_row1)
+        layout.addLayout(button_row2)
+        layout.addLayout(button_row3)
         
         # Table widget for displaying leaders
         self.table = QTableWidget()
