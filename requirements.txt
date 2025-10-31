@@ -1,3 +1,4 @@
 # No dependencies required for Hello World
 PyQt6
 nba_api
+matplotlib

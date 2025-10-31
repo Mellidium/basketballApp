@@ -1,9 +1,12 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QPushButton,
-    QTabWidget, QWidget, QProgressDialog
+    QTabWidget, QWidget, QProgressDialog, QComboBox, QHBoxLayout
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from nbaData import get_most_recent_game_stats, get_player_career_stats
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 class CareerStatsWorker(QThread):
@@ -24,7 +27,7 @@ def show_stats_selection_dialog(parent, player_name, player_id):
     """Show dialog to select which type of stats to view."""
     dialog = QDialog(parent)
     dialog.setWindowTitle(f"{player_name} - Select Stats Type")
-    dialog.resize(300, 200)
+    dialog.resize(300, 150)
     
     layout = QVBoxLayout()
     
@@ -35,11 +38,6 @@ def show_stats_selection_dialog(parent, player_name, player_id):
     career_btn = QPushButton("Career Stats")
     career_btn.clicked.connect(lambda: show_career_stats(dialog, parent, player_name, player_id))
     layout.addWidget(career_btn)
-    
-    # Season Stats button
-    season_btn = QPushButton("Season Stats")
-    season_btn.clicked.connect(lambda: show_season_stats(dialog, parent, player_name, player_id))
-    layout.addWidget(season_btn)
     
     # Last Game Stats button
     last_game_btn = QPushButton("Last Game Stats")
@@ -74,12 +72,6 @@ def show_career_stats(selection_dialog, parent, player_name, player_id):
     
     # Keep reference to worker to prevent garbage collection
     parent._career_stats_worker = worker
-
-
-def show_season_stats(selection_dialog, parent, player_name, player_id):
-    """Show season stats (placeholder for now)."""
-    selection_dialog.close()
-    show_stats_popup(parent, player_name, "Season stats coming soon!")
 
 
 def show_last_game_stats(selection_dialog, parent, player_name, player_id):
@@ -160,6 +152,11 @@ def show_career_stats_popup(parent, player_name, career_data):
         if career_data.get('career_totals_post_season'):
             playoff_career_widget = create_career_totals_table(career_data['career_totals_post_season'])
             tabs.addTab(playoff_career_widget, "Playoff Totals")
+        
+        # Stats Graph Tab
+        if career_data.get('season_totals_regular_season'):
+            graph_widget = create_stats_graph_widget(career_data['season_totals_regular_season'], player_name)
+            tabs.addTab(graph_widget, "Stats Graph")
         
         layout.addWidget(tabs)
     
@@ -257,6 +254,225 @@ def create_career_totals_table(career_data):
         layout.addWidget(table)
     else:
         layout.addWidget(QLabel("No career totals available."))
+    
+    widget.setLayout(layout)
+    return widget
+
+
+def create_stats_graph_widget(season_data, player_name):
+    """Create a widget with a dropdown to select stat and a line graph."""
+    widget = QWidget()
+    layout = QVBoxLayout()
+    
+    # Create dropdown and controls
+    controls_layout = QHBoxLayout()
+    controls_layout.addWidget(QLabel("Select Stat:"))
+    
+    stat_dropdown = QComboBox()
+    
+    # Add stat categories that are numeric and meaningful to graph
+    stat_categories = [
+        ('PTS', 'Points'),
+        ('REB', 'Rebounds'),
+        ('AST', 'Assists'),
+        ('STL', 'Steals'),
+        ('BLK', 'Blocks'),
+        ('MIN', 'Minutes'),
+        ('FG_PCT', 'FG%'),
+        ('FG3_PCT', '3P%'),
+        ('FT_PCT', 'FT%'),
+        ('FG3M', '3PM'),
+        ('FTM', 'FTM'),
+        ('FGM', 'FGM'),
+        ('OREB', 'Off Reb'),
+        ('DREB', 'Def Reb'),
+        ('TOV', 'Turnovers'),
+        ('PF', 'Fouls')
+    ]
+    
+    # Only add stats that exist in the data
+    available_stats = []
+    if season_data:
+        for stat_key, stat_label in stat_categories:
+            if stat_key in season_data[0]:
+                stat_dropdown.addItem(stat_label, stat_key)
+                available_stats.append((stat_key, stat_label))
+    
+    controls_layout.addWidget(stat_dropdown)
+    controls_layout.addStretch(1)
+    layout.addLayout(controls_layout)
+    
+    # Create matplotlib figure and canvas
+    figure = Figure(figsize=(10, 6))
+    canvas = FigureCanvas(figure)
+    layout.addWidget(canvas)
+    
+    # Create annotation for hover tooltip
+    annot = None
+    
+    def update_graph():
+        """Update the graph based on selected stat."""
+        nonlocal annot
+        stat_key = stat_dropdown.currentData()
+        stat_label = stat_dropdown.currentText()
+        
+        if not stat_key or not season_data:
+            return
+        
+        # Aggregate data by season (handle multiple teams in same season)
+        # Data comes in PerGame format, so we need to convert to totals first
+        season_dict = {}
+        
+        for season in season_data:
+            season_id = season.get('SEASON_ID', '')
+            if not season_id:
+                continue
+            
+            # Initialize season if not seen before
+            if season_id not in season_dict:
+                season_dict[season_id] = {
+                    'games': 0,
+                    'totals': {}
+                }
+            
+            # Accumulate data for this season
+            gp = season.get('GP', 0)
+            if gp:
+                season_dict[season_id]['games'] += gp
+                
+                # Convert per-game stats to totals by multiplying by GP, then sum
+                for key in ['PTS', 'REB', 'AST', 'STL', 'BLK', 'MIN', 'FG3M', 'FTM', 'FGM', 
+                           'OREB', 'DREB', 'TOV', 'PF', 'FGA', 'FG3A', 'FTA']:
+                    if key in season:
+                        value = season.get(key, 0)
+                        if value is not None:
+                            # Convert per-game to total by multiplying by games played
+                            total_value = value * gp
+                            season_dict[season_id]['totals'][key] = season_dict[season_id]['totals'].get(key, 0) + total_value
+        
+        # Extract seasons and stat values
+        seasons = []
+        values = []
+        full_season_labels = []
+        
+        # Sort seasons chronologically
+        sorted_seasons = sorted(season_dict.keys())
+        
+        for season_id in sorted_seasons:
+            season_year = season_id.split('-')[0] if '-' in season_id else season_id
+            total_games = season_dict[season_id]['games']
+            
+            if total_games == 0:
+                continue
+            
+            # Calculate the stat value
+            stat_value = None
+            
+            # For percentage stats, recalculate from totals
+            if stat_key == 'FG_PCT':
+                fgm = season_dict[season_id]['totals'].get('FGM', 0)
+                fga = season_dict[season_id]['totals'].get('FGA', 0)
+                if fga > 0:
+                    stat_value = fgm / fga
+            elif stat_key == 'FG3_PCT':
+                fg3m = season_dict[season_id]['totals'].get('FG3M', 0)
+                fg3a = season_dict[season_id]['totals'].get('FG3A', 0)
+                if fg3a > 0:
+                    stat_value = fg3m / fg3a
+            elif stat_key == 'FT_PCT':
+                ftm = season_dict[season_id]['totals'].get('FTM', 0)
+                fta = season_dict[season_id]['totals'].get('FTA', 0)
+                if fta > 0:
+                    stat_value = ftm / fta
+            else:
+                # For counting stats, convert total back to per-game average
+                total_stat = season_dict[season_id]['totals'].get(stat_key, 0)
+                stat_value = total_stat / total_games if total_games > 0 else 0
+            
+            if stat_value is not None:
+                seasons.append(season_year)
+                full_season_labels.append(season_id)
+                values.append(float(stat_value))
+        
+        # Clear the figure and create new plot
+        figure.clear()
+        ax = figure.add_subplot(111)
+        
+        if seasons and values:
+            # Create the line plot with curved lines
+            line, = ax.plot(seasons, values, marker='o', linewidth=2, markersize=8, linestyle='-', picker=5)
+            
+            # Customize the plot
+            ax.set_xlabel('Season', fontsize=12, fontweight='bold')
+            ax.set_ylabel(stat_label, fontsize=12, fontweight='bold')
+            ax.set_title(f'{player_name} - {stat_label} by Season', fontsize=14, fontweight='bold')
+            ax.grid(True, alpha=0.3, linestyle='--')
+            
+            # Rotate x-axis labels for better readability
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+            
+            # Create annotation object for hover tooltip
+            annot = ax.annotate("", xy=(0,0), xytext=(10,10), textcoords="offset points",
+                              bbox=dict(boxstyle="round,pad=0.5", fc="yellow", alpha=0.9, edgecolor="black"),
+                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"),
+                              fontsize=10, fontweight='bold')
+            annot.set_visible(False)
+            
+            def hover(event):
+                """Handle mouse hover events."""
+                if event.inaxes == ax:
+                    # Check if mouse is near any data point
+                    for i, (x, y) in enumerate(zip(range(len(seasons)), values)):
+                        # Get display coordinates of the data point
+                        display_coords = ax.transData.transform((x, y))
+                        mouse_coords = (event.x, event.y)
+                        
+                        # Calculate distance from mouse to point
+                        distance = ((display_coords[0] - mouse_coords[0])**2 + 
+                                  (display_coords[1] - mouse_coords[1])**2)**0.5
+                        
+                        # If mouse is within 10 pixels of a point
+                        if distance < 15:
+                            # Format the value based on stat type
+                            if stat_key.endswith('_PCT'):
+                                formatted_value = f"{y:.3f}"
+                            elif stat_key == 'MIN':
+                                formatted_value = f"{y:.1f}"
+                            else:
+                                formatted_value = f"{y:.1f}" if isinstance(y, float) else str(y)
+                            
+                            # Update annotation
+                            annot.xy = (x, y)
+                            text = f"{full_season_labels[i]}\n{stat_label}: {formatted_value}"
+                            annot.set_text(text)
+                            annot.set_visible(True)
+                            canvas.draw_idle()
+                            return
+                    
+                    # If not near any point, hide annotation
+                    if annot.get_visible():
+                        annot.set_visible(False)
+                        canvas.draw_idle()
+            
+            # Connect hover event
+            canvas.mpl_connect('motion_notify_event', hover)
+            
+            # Add some padding
+            figure.tight_layout()
+        else:
+            ax.text(0.5, 0.5, 'No data available for this stat', 
+                   ha='center', va='center', fontsize=12)
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+        
+        canvas.draw()
+    
+    # Connect dropdown to update function
+    stat_dropdown.currentIndexChanged.connect(update_graph)
+    
+    # Initial graph
+    if available_stats:
+        update_graph()
     
     widget.setLayout(layout)
     return widget
