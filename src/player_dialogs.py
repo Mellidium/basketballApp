@@ -425,13 +425,13 @@ def create_stats_graph_widget(season_data, player_name):
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
             
             # Create annotation object for hover tooltip with modern styling
+            # Center tooltip on the data point by using offset points with (0,0) offset
             annot = ax.annotate("", xy=(0,0), xytext=(0,0), textcoords="offset points",
                               bbox=dict(boxstyle="round,pad=0.7", fc="#89b4fa", alpha=0.95, 
                                        edgecolor="#cdd6f4", linewidth=2),
-                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.2",
-                                            color="#cdd6f4", linewidth=1.5),
+                              arrowprops=None,  # Remove arrow since tooltip is centered
                               fontsize=10, fontweight='bold', color='#1e1e2e',
-                              zorder=1000)
+                              zorder=1000, ha='center', va='center')
             annot.set_visible(False)
             
             def hover(event):
@@ -457,40 +457,9 @@ def create_stats_graph_widget(season_data, player_name):
                             else:
                                 formatted_value = f"{y:.1f}" if isinstance(y, float) else str(y)
                             
-                            # Smart tooltip positioning to avoid cutoff
-                            # Position based on location in graph
-                            xlim = ax.get_xlim()
-                            ylim = ax.get_ylim()
-                            x_range = xlim[1] - xlim[0]
-                            y_range = ylim[1] - ylim[0]
-                            
-                            # Calculate relative position (0 to 1)
-                            x_rel = (x - xlim[0]) / x_range
-                            y_rel = (y - ylim[0]) / y_range
-                            
-                            # Default offset
-                            x_offset = 10
-                            y_offset = 10
-                            
-                            # If point is on right half, position tooltip to the left
-                            if x_rel > 0.5:
-                                x_offset = -100
-                            
-                            # If point is on top half, position tooltip below
-                            if y_rel > 0.5:
-                                y_offset = -50
-                            
-                            # Special case: very rightmost point (last 20%)
-                            if x_rel > 0.8:
-                                x_offset = -120
-                            
-                            # Special case: very top point (top 20%)
-                            if y_rel > 0.8:
-                                y_offset = -60
-                            
-                            # Update annotation with smart positioning
+                            # Center tooltip on the data point
                             annot.xy = (x, y)
-                            annot.xytext = (x_offset, y_offset)
+                            annot.xytext = (x, y)  # Same as xy to center the tooltip
                             text = f"{full_season_labels[i]}\n{stat_label}: {formatted_value}"
                             annot.set_text(text)
                             annot.set_visible(True)
