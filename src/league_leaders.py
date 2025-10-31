@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (
     QTableWidget, QTableWidgetItem, QProgressDialog
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFontMetrics, QFont
 from nbaData import get_league_leaders
 
 
@@ -24,14 +25,22 @@ class LeagueLeadersPage(QWidget):
     def __init__(self, stacked_widget=None):
         super().__init__()
         self.stacked_widget = stacked_widget
+        
+        # Get base unit for relative sizing
+        font = QFont()
+        font.setPointSize(14)
+        metrics = QFontMetrics(font)
+        base_unit = metrics.height()
+        
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(int(base_unit * 1.4), int(base_unit * 1.4), 
+                                 int(base_unit * 1.4), int(base_unit * 1.4))
+        layout.setSpacing(int(base_unit))
         
         # Top bar for Back button (always present)
         top_bar = QHBoxLayout()
         back_btn = QPushButton('Back')
-        back_btn.setFixedWidth(100)
+        back_btn.setMinimumWidth(int(base_unit * 7))
         back_btn.clicked.connect(self.go_back)
         top_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
         top_bar.addStretch(1)
@@ -39,7 +48,7 @@ class LeagueLeadersPage(QWidget):
         
         # Stat category buttons
         stats_label = QLabel('Select a stat category:')
-        stats_label.setStyleSheet("font-size: 16px; font-weight: bold; padding: 10px 0;")
+        stats_label.setStyleSheet("font-size: 1.15em; font-weight: bold; padding: 0.7em 0;")
         layout.addWidget(stats_label)
         
         # Create button grid for stat categories
@@ -71,33 +80,35 @@ class LeagueLeadersPage(QWidget):
         
         # Create buttons for each stat category in multiple rows
         button_row1 = QHBoxLayout()
-        button_row1.setSpacing(10)
+        button_row1.setSpacing(int(base_unit * 0.7))
         button_row2 = QHBoxLayout()
-        button_row2.setSpacing(10)
+        button_row2.setSpacing(int(base_unit * 0.7))
         button_row3 = QHBoxLayout()
-        button_row3.setSpacing(10)
+        button_row3.setSpacing(int(base_unit * 0.7))
         
         stat_items = list(self.stat_categories.items())
         row_size = 8
         
+        btn_min_height = int(base_unit * 2.4)
+        
         # First row (8 buttons)
         for stat_abbr, stat_name in stat_items[:row_size]:
             btn = QPushButton(stat_name)
-            btn.setMinimumHeight(35)
+            btn.setMinimumHeight(btn_min_height)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
             button_row1.addWidget(btn)
         
         # Second row (8 buttons)
         for stat_abbr, stat_name in stat_items[row_size:row_size*2]:
             btn = QPushButton(stat_name)
-            btn.setMinimumHeight(35)
+            btn.setMinimumHeight(btn_min_height)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
             button_row2.addWidget(btn)
         
         # Third row (remaining buttons)
         for stat_abbr, stat_name in stat_items[row_size*2:]:
             btn = QPushButton(stat_name)
-            btn.setMinimumHeight(35)
+            btn.setMinimumHeight(btn_min_height)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
             button_row3.addWidget(btn)
         

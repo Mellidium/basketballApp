@@ -2,6 +2,8 @@
 
 import sys
 from PyQt6.QtWidgets import QApplication, QStackedWidget
+from PyQt6.QtGui import QFontMetrics, QFont
+from PyQt6.QtCore import QSize
 from main_menu import MainMenu
 from player_list import PlayerListApp
 from league_leaders import LeagueLeadersPage
@@ -13,6 +15,12 @@ if __name__ == '__main__':
     
     # Apply modern stylesheet
     app.setStyleSheet(MAIN_STYLESHEET)
+    
+    # Get base unit for relative sizing
+    font = QFont()
+    font.setPointSize(14)
+    metrics = QFontMetrics(font)
+    base_unit = metrics.height()
     
     stacked_widget = QStackedWidget()
     
@@ -26,10 +34,11 @@ if __name__ == '__main__':
     stacked_widget.addWidget(player_list)       # index 1
     stacked_widget.addWidget(league_leaders)   # index 2
     
-    # Configure and show window
+    # Configure and show window with relative sizing
     stacked_widget.setCurrentIndex(0)
     stacked_widget.setWindowTitle('Basketball App')
-    stacked_widget.resize(400, 500)
+    # Use relative sizing: ~28em width x ~35em height
+    stacked_widget.resize(QSize(int(base_unit * 28), int(base_unit * 35)))
     stacked_widget.show()
     
     sys.exit(app.exec())

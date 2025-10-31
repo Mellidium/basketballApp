@@ -119,10 +119,13 @@ def show_career_stats_popup(parent, player_name, career_data):
     """Display career stats in a tabbed dialog with season-by-season and career totals."""
     dialog = QDialog(parent)
     dialog.setWindowTitle(f"{player_name} - Career Stats")
-    dialog.resize(900, 600)
+    # Increase size to better accommodate the graph
+    dialog.resize(1100, 750)
     
     layout = QVBoxLayout()
+    layout.setContentsMargins(15, 15, 15, 15)
     label = QLabel(f"Career stats for {player_name}:")
+    label.setStyleSheet("font-size: 1.1em; font-weight: bold; padding: 0.5em 0;")
     layout.addWidget(label)
     
     # Check if we have any data
@@ -303,9 +306,10 @@ def create_stats_graph_widget(season_data, player_name):
     controls_layout.addStretch(1)
     layout.addLayout(controls_layout)
     
-    # Create matplotlib figure and canvas
-    figure = Figure(figsize=(10, 6))
+    # Create matplotlib figure and canvas with better sizing
+    figure = Figure(figsize=(12, 7), tight_layout=True)
     canvas = FigureCanvas(figure)
+    canvas.setMinimumSize(600, 400)
     layout.addWidget(canvas)
     
     # Create annotation for hover tooltip
@@ -408,26 +412,30 @@ def create_stats_graph_widget(season_data, player_name):
                            linestyle='-', color='#89b4fa', markerfacecolor='#89b4fa', 
                            markeredgecolor='#cdd6f4', markeredgewidth=1, picker=5)
             
-            # Customize the plot
+            # Customize the plot with better margins
             ax.set_xlabel('Season', fontsize=12, fontweight='600', color='#cdd6f4')
             ax.set_ylabel(stat_label, fontsize=12, fontweight='600', color='#cdd6f4')
             ax.set_title(f'{player_name} - {stat_label} by Season', fontsize=14, fontweight='bold', 
                         color='#cdd6f4', pad=15)
             
+            # Add margins to prevent tooltip cutoff
+            ax.margins(x=0.05, y=0.15)
+            
             # Rotate x-axis labels for better readability
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
             
             # Create annotation object for hover tooltip with modern styling
-            annot = ax.annotate("", xy=(0,0), xytext=(10,10), textcoords="offset points",
+            annot = ax.annotate("", xy=(0,0), xytext=(0,0), textcoords="offset points",
                               bbox=dict(boxstyle="round,pad=0.7", fc="#89b4fa", alpha=0.95, 
                                        edgecolor="#cdd6f4", linewidth=2),
                               arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.2",
                                             color="#cdd6f4", linewidth=1.5),
-                              fontsize=10, fontweight='bold', color='#1e1e2e')
+                              fontsize=10, fontweight='bold', color='#1e1e2e',
+                              zorder=1000)
             annot.set_visible(False)
             
             def hover(event):
-                """Handle mouse hover events."""
+                """Handle mouse hover events with smart tooltip positioning."""
                 if event.inaxes == ax:
                     # Check if mouse is near any data point
                     for i, (x, y) in enumerate(zip(range(len(seasons)), values)):
@@ -439,7 +447,7 @@ def create_stats_graph_widget(season_data, player_name):
                         distance = ((display_coords[0] - mouse_coords[0])**2 + 
                                   (display_coords[1] - mouse_coords[1])**2)**0.5
                         
-                        # If mouse is within 10 pixels of a point
+                        # If mouse is within 15 pixels of a point
                         if distance < 15:
                             # Format the value based on stat type
                             if stat_key.endswith('_PCT'):
@@ -449,8 +457,40 @@ def create_stats_graph_widget(season_data, player_name):
                             else:
                                 formatted_value = f"{y:.1f}" if isinstance(y, float) else str(y)
                             
-                            # Update annotation
+                            # Smart tooltip positioning to avoid cutoff
+                            # Position based on location in graph
+                            xlim = ax.get_xlim()
+                            ylim = ax.get_ylim()
+                            x_range = xlim[1] - xlim[0]
+                            y_range = ylim[1] - ylim[0]
+                            
+                            # Calculate relative position (0 to 1)
+                            x_rel = (x - xlim[0]) / x_range
+                            y_rel = (y - ylim[0]) / y_range
+                            
+                            # Default offset
+                            x_offset = 10
+                            y_offset = 10
+                            
+                            # If point is on right half, position tooltip to the left
+                            if x_rel > 0.5:
+                                x_offset = -100
+                            
+                            # If point is on top half, position tooltip below
+                            if y_rel > 0.5:
+                                y_offset = -50
+                            
+                            # Special case: very rightmost point (last 20%)
+                            if x_rel > 0.8:
+                                x_offset = -120
+                            
+                            # Special case: very top point (top 20%)
+                            if y_rel > 0.8:
+                                y_offset = -60
+                            
+                            # Update annotation with smart positioning
                             annot.xy = (x, y)
+                            annot.xytext = (x_offset, y_offset)
                             text = f"{full_season_labels[i]}\n{stat_label}: {formatted_value}"
                             annot.set_text(text)
                             annot.set_visible(True)
@@ -465,13 +505,14 @@ def create_stats_graph_widget(season_data, player_name):
             # Connect hover event
             canvas.mpl_connect('motion_notify_event', hover)
             
-            # Add some padding
-            figure.tight_layout()
+            # Apply tight layout with padding to prevent cutoff
+            figure.tight_layout(pad=2.0)
         else:
             ax.text(0.5, 0.5, 'No data available for this stat', 
-                   ha='center', va='center', fontsize=12)
+                   ha='center', va='center', fontsize=12, color='#cdd6f4')
             ax.set_xlim(0, 1)
             ax.set_ylim(0, 1)
+            figure.tight_layout(pad=2.0)
         
         canvas.draw()
     

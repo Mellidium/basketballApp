@@ -2,7 +2,25 @@
 Modern styling for the Basketball App
 """
 
-# Main application stylesheet
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtGui import QFontMetrics, QFont
+
+def get_scale_factor():
+    """Get the DPI scale factor for the current screen"""
+    app = QApplication.instance()
+    if app:
+        screen = app.primaryScreen()
+        return screen.logicalDotsPerInch() / 96.0  # 96 DPI is the standard baseline
+    return 1.0
+
+def get_base_unit():
+    """Get base unit for scaling (em units based on font size)"""
+    font = QFont()
+    font.setPointSize(14)
+    metrics = QFontMetrics(font)
+    return metrics.height()  # Use font height as base unit
+
+# Main application stylesheet - using em/ex units for relative sizing
 MAIN_STYLESHEET = """
     QWidget {
         background-color: #1e1e2e;
@@ -19,11 +37,11 @@ MAIN_STYLESHEET = """
         background-color: #89b4fa;
         color: #1e1e2e;
         border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
+        padding: 0.7em 1.4em;
+        border-radius: 0.4em;
         font-weight: bold;
-        font-size: 14px;
-        min-height: 20px;
+        font-size: 1em;
+        min-height: 1.4em;
     }
     
     QPushButton:hover {
@@ -41,8 +59,8 @@ MAIN_STYLESHEET = """
     
     QLabel {
         color: #cdd6f4;
-        font-size: 14px;
-        padding: 4px;
+        font-size: 1em;
+        padding: 0.3em;
     }
     
     QTableWidget {
@@ -51,13 +69,13 @@ MAIN_STYLESHEET = """
         color: #cdd6f4;
         gridline-color: #313244;
         border: 1px solid #313244;
-        border-radius: 8px;
+        border-radius: 0.6em;
         selection-background-color: #89b4fa;
         selection-color: #1e1e2e;
     }
     
     QTableWidget::item {
-        padding: 8px;
+        padding: 0.6em;
         border: none;
     }
     
@@ -69,10 +87,10 @@ MAIN_STYLESHEET = """
     QHeaderView::section {
         background-color: #313244;
         color: #cdd6f4;
-        padding: 10px;
+        padding: 0.7em;
         border: none;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 0.95em;
     }
     
     QHeaderView::section:hover {
@@ -81,14 +99,14 @@ MAIN_STYLESHEET = """
     
     QScrollBar:vertical {
         background-color: #1e1e2e;
-        width: 12px;
-        border-radius: 6px;
+        width: 0.85em;
+        border-radius: 0.4em;
     }
     
     QScrollBar::handle:vertical {
         background-color: #45475a;
-        border-radius: 6px;
-        min-height: 20px;
+        border-radius: 0.4em;
+        min-height: 1.4em;
     }
     
     QScrollBar::handle:vertical:hover {
@@ -97,14 +115,14 @@ MAIN_STYLESHEET = """
     
     QScrollBar:horizontal {
         background-color: #1e1e2e;
-        height: 12px;
-        border-radius: 6px;
+        height: 0.85em;
+        border-radius: 0.4em;
     }
     
     QScrollBar::handle:horizontal {
         background-color: #45475a;
-        border-radius: 6px;
-        min-width: 20px;
+        border-radius: 0.4em;
+        min-width: 1.4em;
     }
     
     QScrollBar::handle:horizontal:hover {
@@ -122,18 +140,18 @@ MAIN_STYLESHEET = """
     
     QTabWidget::pane {
         border: 1px solid #313244;
-        border-radius: 8px;
+        border-radius: 0.6em;
         background-color: #181825;
-        padding: 8px;
+        padding: 0.6em;
     }
     
     QTabBar::tab {
         background-color: #313244;
         color: #cdd6f4;
-        padding: 10px 20px;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
-        margin-right: 2px;
+        padding: 0.7em 1.4em;
+        border-top-left-radius: 0.4em;
+        border-top-right-radius: 0.4em;
+        margin-right: 0.15em;
         font-weight: 500;
     }
     
@@ -151,10 +169,10 @@ MAIN_STYLESHEET = """
         background-color: #313244;
         color: #cdd6f4;
         border: 1px solid #45475a;
-        border-radius: 6px;
-        padding: 8px 12px;
-        min-width: 150px;
-        font-size: 14px;
+        border-radius: 0.4em;
+        padding: 0.6em 0.85em;
+        min-width: 10em;
+        font-size: 1em;
     }
     
     QComboBox:hover {
@@ -163,15 +181,15 @@ MAIN_STYLESHEET = """
     
     QComboBox::drop-down {
         border: none;
-        width: 30px;
+        width: 2.1em;
     }
     
     QComboBox::down-arrow {
         image: none;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 5px solid #cdd6f4;
-        margin-right: 8px;
+        border-left: 0.35em solid transparent;
+        border-right: 0.35em solid transparent;
+        border-top: 0.35em solid #cdd6f4;
+        margin-right: 0.6em;
     }
     
     QComboBox QAbstractItemView {
@@ -180,8 +198,8 @@ MAIN_STYLESHEET = """
         selection-background-color: #89b4fa;
         selection-color: #1e1e2e;
         border: 1px solid #45475a;
-        border-radius: 6px;
-        padding: 4px;
+        border-radius: 0.4em;
+        padding: 0.3em;
     }
     
     QProgressDialog {
@@ -192,9 +210,9 @@ MAIN_STYLESHEET = """
         background-color: #313244;
         color: #cdd6f4;
         border: 1px solid #45475a;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 14px;
+        border-radius: 0.4em;
+        padding: 0.6em 0.85em;
+        font-size: 1em;
     }
     
     QLineEdit:focus {

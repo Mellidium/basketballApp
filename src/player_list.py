@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QPushButton, QHBoxLayout, QLabel, QLineEdit
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFontMetrics, QFont
 from nbaData import get_active_players, get_player_id_by_name
 from player_dialogs import show_stats_selection_dialog
 
@@ -16,15 +17,22 @@ class PlayerListApp(QWidget):
         self.nba_players = get_active_players()
         self.page = 0
         self.page_size = 20
+        
+        # Get base unit for relative sizing
+        font = QFont()
+        font.setPointSize(14)
+        metrics = QFontMetrics(font)
+        base_unit = metrics.height()
 
         self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(20, 20, 20, 20)
-        self.layout.setSpacing(15)
+        self.layout.setContentsMargins(int(base_unit * 1.4), int(base_unit * 1.4), 
+                                       int(base_unit * 1.4), int(base_unit * 1.4))
+        self.layout.setSpacing(int(base_unit))
         
         # Top bar for Back button (always present)
         top_bar = QHBoxLayout()
         back_btn = QPushButton('Back')
-        back_btn.setFixedWidth(100)
+        back_btn.setMinimumWidth(int(base_unit * 7))
         back_btn.clicked.connect(self.go_back)
         top_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
         top_bar.addStretch(1)
@@ -32,14 +40,14 @@ class PlayerListApp(QWidget):
 
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText('Search players...')
-        self.search_bar.setMinimumHeight(40)
+        self.search_bar.setMinimumHeight(int(base_unit * 2.8))
         self.search_bar.textChanged.connect(self.filter_players)
         self.layout.addWidget(self.search_bar)
 
         self.list_widget = QListWidget()
         self.list_widget.setStyleSheet("""
             QListWidget::item {
-                padding: 12px;
+                padding: 0.85em;
                 border-bottom: 1px solid #313244;
             }
             QListWidget::item:hover {
@@ -57,13 +65,13 @@ class PlayerListApp(QWidget):
 
         # Pagination controls
         self.pagination_layout = QHBoxLayout()
-        self.pagination_layout.setSpacing(15)
+        self.pagination_layout.setSpacing(int(base_unit))
         self.prev_button = QPushButton('Previous')
         self.next_button = QPushButton('Next')
-        self.prev_button.setMinimumHeight(40)
-        self.next_button.setMinimumHeight(40)
+        self.prev_button.setMinimumHeight(int(base_unit * 2.8))
+        self.next_button.setMinimumHeight(int(base_unit * 2.8))
         self.page_label = QLabel()
-        self.page_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        self.page_label.setStyleSheet("font-weight: bold; font-size: 1em;")
         self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.prev_button.clicked.connect(self.prev_page)
         self.next_button.clicked.connect(self.next_page)
