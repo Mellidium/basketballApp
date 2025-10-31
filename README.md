@@ -1,3 +1,3 @@
-# basketballApp
+# Basketball Statistics Python App
 
-A simple Python Hello World application.
+A Python application for viewing NBA statistics.
