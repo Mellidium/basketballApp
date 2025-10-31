@@ -7,6 +7,7 @@ from nbaData import get_most_recent_game_stats, get_player_career_stats
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from styles import apply_graph_style
 
 
 class CareerStatsWorker(QThread):
@@ -399,23 +400,30 @@ def create_stats_graph_widget(season_data, player_name):
         ax = figure.add_subplot(111)
         
         if seasons and values:
-            # Create the line plot with curved lines
-            line, = ax.plot(seasons, values, marker='o', linewidth=2, markersize=8, linestyle='-', picker=5)
+            # Apply modern styling to the graph
+            apply_graph_style(figure, ax)
+            
+            # Create the line plot with modern styling
+            line, = ax.plot(seasons, values, marker='o', linewidth=2.5, markersize=8, 
+                           linestyle='-', color='#89b4fa', markerfacecolor='#89b4fa', 
+                           markeredgecolor='#cdd6f4', markeredgewidth=1, picker=5)
             
             # Customize the plot
-            ax.set_xlabel('Season', fontsize=12, fontweight='bold')
-            ax.set_ylabel(stat_label, fontsize=12, fontweight='bold')
-            ax.set_title(f'{player_name} - {stat_label} by Season', fontsize=14, fontweight='bold')
-            ax.grid(True, alpha=0.3, linestyle='--')
+            ax.set_xlabel('Season', fontsize=12, fontweight='600', color='#cdd6f4')
+            ax.set_ylabel(stat_label, fontsize=12, fontweight='600', color='#cdd6f4')
+            ax.set_title(f'{player_name} - {stat_label} by Season', fontsize=14, fontweight='bold', 
+                        color='#cdd6f4', pad=15)
             
             # Rotate x-axis labels for better readability
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
             
-            # Create annotation object for hover tooltip
+            # Create annotation object for hover tooltip with modern styling
             annot = ax.annotate("", xy=(0,0), xytext=(10,10), textcoords="offset points",
-                              bbox=dict(boxstyle="round,pad=0.5", fc="yellow", alpha=0.9, edgecolor="black"),
-                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"),
-                              fontsize=10, fontweight='bold')
+                              bbox=dict(boxstyle="round,pad=0.7", fc="#89b4fa", alpha=0.95, 
+                                       edgecolor="#cdd6f4", linewidth=2),
+                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.2",
+                                            color="#cdd6f4", linewidth=1.5),
+                              fontsize=10, fontweight='bold', color='#1e1e2e')
             annot.set_visible(False)
             
             def hover(event):

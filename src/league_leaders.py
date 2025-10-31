@@ -25,11 +25,13 @@ class LeagueLeadersPage(QWidget):
         super().__init__()
         self.stacked_widget = stacked_widget
         layout = QVBoxLayout()
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
         
         # Top bar for Back button (always present)
         top_bar = QHBoxLayout()
         back_btn = QPushButton('Back')
-        back_btn.setFixedWidth(80)
+        back_btn.setFixedWidth(100)
         back_btn.clicked.connect(self.go_back)
         top_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
         top_bar.addStretch(1)
@@ -37,6 +39,7 @@ class LeagueLeadersPage(QWidget):
         
         # Stat category buttons
         stats_label = QLabel('Select a stat category:')
+        stats_label.setStyleSheet("font-size: 16px; font-weight: bold; padding: 10px 0;")
         layout.addWidget(stats_label)
         
         # Create button grid for stat categories
@@ -68,8 +71,11 @@ class LeagueLeadersPage(QWidget):
         
         # Create buttons for each stat category in multiple rows
         button_row1 = QHBoxLayout()
+        button_row1.setSpacing(10)
         button_row2 = QHBoxLayout()
+        button_row2.setSpacing(10)
         button_row3 = QHBoxLayout()
+        button_row3.setSpacing(10)
         
         stat_items = list(self.stat_categories.items())
         row_size = 8
@@ -77,18 +83,21 @@ class LeagueLeadersPage(QWidget):
         # First row (8 buttons)
         for stat_abbr, stat_name in stat_items[:row_size]:
             btn = QPushButton(stat_name)
+            btn.setMinimumHeight(35)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
             button_row1.addWidget(btn)
         
         # Second row (8 buttons)
         for stat_abbr, stat_name in stat_items[row_size:row_size*2]:
             btn = QPushButton(stat_name)
+            btn.setMinimumHeight(35)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
             button_row2.addWidget(btn)
         
         # Third row (remaining buttons)
         for stat_abbr, stat_name in stat_items[row_size*2:]:
             btn = QPushButton(stat_name)
+            btn.setMinimumHeight(35)
             btn.clicked.connect(lambda checked, s=stat_abbr: self.load_leaders(s))
             button_row3.addWidget(btn)
         

@@ -5,10 +5,15 @@ from PyQt6.QtWidgets import QApplication, QStackedWidget
 from main_menu import MainMenu
 from player_list import PlayerListApp
 from league_leaders import LeagueLeadersPage
+from styles import MAIN_STYLESHEET
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    
+    # Apply modern stylesheet
+    app.setStyleSheet(MAIN_STYLESHEET)
+    
     stacked_widget = QStackedWidget()
     
     # Create pages

@@ -18,11 +18,13 @@ class PlayerListApp(QWidget):
         self.page_size = 20
 
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(20, 20, 20, 20)
+        self.layout.setSpacing(15)
         
         # Top bar for Back button (always present)
         top_bar = QHBoxLayout()
         back_btn = QPushButton('Back')
-        back_btn.setFixedWidth(80)
+        back_btn.setFixedWidth(100)
         back_btn.clicked.connect(self.go_back)
         top_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
         top_bar.addStretch(1)
@@ -30,10 +32,24 @@ class PlayerListApp(QWidget):
 
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText('Search players...')
+        self.search_bar.setMinimumHeight(40)
         self.search_bar.textChanged.connect(self.filter_players)
         self.layout.addWidget(self.search_bar)
 
         self.list_widget = QListWidget()
+        self.list_widget.setStyleSheet("""
+            QListWidget::item {
+                padding: 12px;
+                border-bottom: 1px solid #313244;
+            }
+            QListWidget::item:hover {
+                background-color: #313244;
+            }
+            QListWidget::item:selected {
+                background-color: #89b4fa;
+                color: #1e1e2e;
+            }
+        """)
         self.layout.addWidget(self.list_widget)
         self.list_widget.itemClicked.connect(self.show_player_game_data)
 
@@ -41,9 +57,14 @@ class PlayerListApp(QWidget):
 
         # Pagination controls
         self.pagination_layout = QHBoxLayout()
+        self.pagination_layout.setSpacing(15)
         self.prev_button = QPushButton('Previous')
         self.next_button = QPushButton('Next')
+        self.prev_button.setMinimumHeight(40)
+        self.next_button.setMinimumHeight(40)
         self.page_label = QLabel()
+        self.page_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.prev_button.clicked.connect(self.prev_page)
         self.next_button.clicked.connect(self.next_page)
         self.pagination_layout.addWidget(self.prev_button)
