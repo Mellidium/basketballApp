@@ -15,8 +15,16 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     from PyQt6.QtGui import QIcon
     import os
+    
     # Set the application icon for taskbar and all windows
-    icon_path = os.path.join(os.path.dirname(__file__), '../assets/bball.ico')
+    # When bundled with PyInstaller, use sys._MEIPASS to find resources
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        icon_path = os.path.join(sys._MEIPASS, 'assets', 'bball_new.ico')
+    else:
+        # Running as script
+        icon_path = os.path.join(os.path.dirname(__file__), '../assets/bball_new.ico')
+    
     app.setWindowIcon(QIcon(icon_path))
 
     # Apply modern stylesheet
@@ -45,6 +53,8 @@ if __name__ == '__main__':
     # Configure and show window with relative sizing
     stacked_widget.setCurrentIndex(0)
     stacked_widget.setWindowTitle('Basketball App')
+    # Set window icon explicitly
+    stacked_widget.setWindowIcon(QIcon(icon_path))
     # Use relative sizing: ~28em width x ~35em height
     stacked_widget.resize(QSize(int(base_unit * 28), int(base_unit * 35)))
     stacked_widget.show()
