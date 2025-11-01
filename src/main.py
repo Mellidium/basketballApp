@@ -13,36 +13,41 @@ from styles import MAIN_STYLESHEET
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    
+    from PyQt6.QtGui import QIcon
+    import os
+    # Set the application icon for taskbar and all windows
+    icon_path = os.path.join(os.path.dirname(__file__), '../assets/bball.png')
+    app.setWindowIcon(QIcon(icon_path))
+
     # Apply modern stylesheet
     app.setStyleSheet(MAIN_STYLESHEET)
-    
+
     # Get base unit for relative sizing
     font = QFont()
     font.setPointSize(14)
     metrics = QFontMetrics(font)
     base_unit = metrics.height()
-    
+
     stacked_widget = QStackedWidget()
-    
+
     # Create pages
     main_menu = MainMenu(stacked_widget)
     player_list = PlayerListApp(stacked_widget)
     league_leaders = LeagueLeadersPage(stacked_widget)
     team_list = TeamListApp(stacked_widget)
-    
+
     # Add pages to stack
     stacked_widget.addWidget(main_menu)         # index 0
     stacked_widget.addWidget(player_list)       # index 1
     stacked_widget.addWidget(league_leaders)   # index 2
     stacked_widget.addWidget(team_list)        # index 3
-    
+
     # Configure and show window with relative sizing
     stacked_widget.setCurrentIndex(0)
     stacked_widget.setWindowTitle('Basketball App')
     # Use relative sizing: ~28em width x ~35em height
     stacked_widget.resize(QSize(int(base_unit * 28), int(base_unit * 35)))
     stacked_widget.show()
-    
+
     sys.exit(app.exec())
 
