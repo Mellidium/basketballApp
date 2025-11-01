@@ -59,7 +59,7 @@ def get_player_career_stats(player_id, per_mode='PerGame'):
             'season_totals_post_season': [],
             'career_totals_post_season': []
         }
-from nba_api.stats.static import players
+from nba_api.stats.static import players, teams
 
 def get_active_players():
     """Return a list of active NBA players."""
@@ -70,6 +70,17 @@ def get_player_id_by_name(name):
     for player in players.get_active_players():
         if player['full_name'].lower() == name.lower():
             return player['id']
+    return None
+
+def get_nba_teams():
+    """Return a list of all NBA teams."""
+    return teams.get_teams()
+
+def get_team_id_by_name(name):
+    """Return the team ID for a given team name (case-insensitive). Returns None if not found."""
+    for team in teams.get_teams():
+        if team['full_name'].lower() == name.lower() or team['nickname'].lower() == name.lower():
+            return team['id']
     return None
 
 def get_most_recent_game_stats(player_id):

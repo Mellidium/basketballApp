@@ -31,12 +31,14 @@ class MainMenu(QWidget):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         btn_stats = QPushButton('Stats by Player')
+        btn_teams = QPushButton('Team Stats')
         btn_leaders = QPushButton('League Leaders')
         
         # Use relative sizing based on font metrics
         btn_width = int(base_unit * 17)
         btn_height = int(base_unit * 4.2)
         btn_stats.setMinimumSize(QSize(btn_width, btn_height))
+        btn_teams.setMinimumSize(QSize(btn_width, btn_height))
         btn_leaders.setMinimumSize(QSize(btn_width, btn_height))
         
         layout.addStretch(1)
@@ -44,15 +46,21 @@ class MainMenu(QWidget):
         layout.addSpacing(int(base_unit * 2))
         layout.addWidget(btn_stats, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addSpacing(int(base_unit))
+        layout.addWidget(btn_teams, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addSpacing(int(base_unit))
         layout.addWidget(btn_leaders, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addStretch(1)
         
         btn_stats.clicked.connect(self.show_player_stats)
+        btn_teams.clicked.connect(self.show_team_stats)
         btn_leaders.clicked.connect(self.show_league_leaders)
         self.setLayout(layout)
 
     def show_player_stats(self):
         self.stacked_widget.setCurrentIndex(1)
+
+    def show_team_stats(self):
+        self.stacked_widget.setCurrentIndex(3)
 
     def show_league_leaders(self):
         self.stacked_widget.setCurrentIndex(2)

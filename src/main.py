@@ -6,6 +6,7 @@ from PyQt6.QtGui import QFontMetrics, QFont
 from PyQt6.QtCore import QSize
 from main_menu import MainMenu
 from player_list import PlayerListApp
+from team_list import TeamListApp
 from league_leaders import LeagueLeadersPage
 from styles import MAIN_STYLESHEET
 
@@ -28,11 +29,13 @@ if __name__ == '__main__':
     main_menu = MainMenu(stacked_widget)
     player_list = PlayerListApp(stacked_widget)
     league_leaders = LeagueLeadersPage(stacked_widget)
+    team_list = TeamListApp(stacked_widget)
     
     # Add pages to stack
     stacked_widget.addWidget(main_menu)         # index 0
     stacked_widget.addWidget(player_list)       # index 1
     stacked_widget.addWidget(league_leaders)   # index 2
+    stacked_widget.addWidget(team_list)        # index 3
     
     # Configure and show window with relative sizing
     stacked_widget.setCurrentIndex(0)
