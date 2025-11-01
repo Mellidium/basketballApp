@@ -25,3 +25,6 @@ env/
 
 # macOS
 .DS_Store
+
+# Windows
+src/run_app.ps1

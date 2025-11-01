@@ -37,15 +37,6 @@ class LeagueLeadersPage(QWidget):
                                  int(base_unit * 1.4), int(base_unit * 1.4))
         layout.setSpacing(int(base_unit))
         
-        # Top bar for Back button (always present)
-        top_bar = QHBoxLayout()
-        back_btn = QPushButton('Back')
-        back_btn.setMinimumWidth(int(base_unit * 7))
-        back_btn.clicked.connect(self.go_back)
-        top_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
-        top_bar.addStretch(1)
-        layout.addLayout(top_bar)
-        
         # Stat category buttons
         stats_label = QLabel('Select a stat category:')
         stats_label.setStyleSheet("font-size: 1.15em; font-weight: bold; padding: 0.7em 0;")
@@ -123,6 +114,15 @@ class LeagueLeadersPage(QWidget):
         self.table = QTableWidget()
         self.table.setMinimumHeight(400)
         layout.addWidget(self.table)
+        
+        # Bottom bar for Back button
+        bottom_bar = QHBoxLayout()
+        back_btn = QPushButton('Back')
+        back_btn.setMinimumWidth(int(base_unit * 7))
+        back_btn.clicked.connect(self.go_back)
+        bottom_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        bottom_bar.addStretch(1)
+        layout.addLayout(bottom_bar)
         
         self.setLayout(layout)
 

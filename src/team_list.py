@@ -29,15 +29,6 @@ class TeamListApp(QWidget):
         self.layout.setContentsMargins(int(base_unit * 1.4), int(base_unit * 1.4), 
                                        int(base_unit * 1.4), int(base_unit * 1.4))
         self.layout.setSpacing(int(base_unit))
-        
-        # Top bar for Back button (always present)
-        top_bar = QHBoxLayout()
-        back_btn = QPushButton('Back')
-        back_btn.setMinimumWidth(int(base_unit * 7))
-        back_btn.clicked.connect(self.go_back)
-        top_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
-        top_bar.addStretch(1)
-        self.layout.addLayout(top_bar)
 
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText('Search teams...')
@@ -63,6 +54,15 @@ class TeamListApp(QWidget):
         self.list_widget.itemClicked.connect(self.show_team_stats)
 
         self.filtered_teams = self.nba_teams
+
+        # Bottom bar for Back button
+        bottom_bar = QHBoxLayout()
+        back_btn = QPushButton('Back')
+        back_btn.setMinimumWidth(int(base_unit * 7))
+        back_btn.clicked.connect(self.go_back)
+        bottom_bar.addWidget(back_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        bottom_bar.addStretch(1)
+        self.layout.addLayout(bottom_bar)
 
         self.setLayout(self.layout)
         self.update_list()
