@@ -16,7 +16,7 @@ if __name__ == '__main__':
     from PyQt6.QtGui import QIcon
     import os
     # Set the application icon for taskbar and all windows
-    icon_path = os.path.join(os.path.dirname(__file__), '../assets/bball.png')
+    icon_path = os.path.join(os.path.dirname(__file__), '../assets/bball.ico')
     app.setWindowIcon(QIcon(icon_path))
 
     # Apply modern stylesheet

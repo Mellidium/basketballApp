@@ -27,7 +27,7 @@ jobs:
 
       - name: Build macOS executable
         run: |
-          pyinstaller src/main.py --onefile --distpath dist --name basketballApp-mac --hidden-import PyQt6
+          pyinstaller src/main.py --onefile --distpath dist --name basketballApp-mac --hidden-import PyQt6 --icon assets/bball.ico
 
       - name: Upload macOS executable
         uses: actions/upload-artifact@v4
@@ -54,7 +54,7 @@ jobs:
 
       - name: Build Windows executable
         run: |
-          pyinstaller src/main.py --onefile --distpath dist --name basketballApp-win.exe --hidden-import PyQt6
+          pyinstaller src/main.py --onefile --distpath dist --name basketballApp-win.exe --hidden-import PyQt6 --icon assets/bball.ico
 
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4
