@@ -236,6 +236,9 @@ def draw_shot_chart(figure, canvas, shot_data, team_name, season, error_msg=None
     figure.clear()
     ax = figure.add_subplot(111)
     
+    # Apply global graph styling
+    apply_graph_style(figure, ax)
+    
     # Draw the court
     draw_basketball_court(ax)
     
