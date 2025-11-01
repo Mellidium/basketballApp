@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import playergamelog, leagueleaders, playercareerstats
+from nba_api.stats.endpoints import playergamelog, leagueleaders, playercareerstats, teamdashboardbyshootingsplits
 
 def get_league_leaders(stat_category):
     """
@@ -95,3 +95,58 @@ def get_most_recent_game_stats(player_id):
     except Exception as e:
         print(f"Error fetching game stats: {e}")
         return None
+
+def get_team_shot_locations(team_id, season='2024-25'):
+    """
+    Return shot location data for a given team and season.
+    
+    Args:
+        team_id: NBA team ID
+        season: Season in format 'YYYY-YY' (e.g., '2024-25')
+    
+    Returns:
+        dict with shot location data by area
+    """
+    try:
+        shot_data = teamdashboardbyshootingsplits.TeamDashboardByShootingSplits(
+            team_id=team_id,
+            season=season,
+            measure_type_detailed_defense='Base',
+            per_mode_detailed='PerGame'
+        )
+        
+        # Get the shot area data (index 1 contains shot area splits)
+        dfs = shot_data.get_data_frames()
+        
+        # Available DataFrames:
+        # [0] = OverallTeamDashboard
+        # [1] = Shot5FTTeamDashboard
+        # [2] = Shot8FTTeamDashboard  
+        # [3] = ShotAreaTeamDashboard
+        # [4] = AssistedShotTeamDashboard
+        # [5] = ShotTypeSummaryTeamDashboard
+        # [6] = ShotTypeTeamDashboard
+        # [7] = AssistedByTeamDashboard
+        
+        return {
+            'overall': dfs[0].to_dict(orient='records') if len(dfs) > 0 and not dfs[0].empty else [],
+            'shot_5ft': dfs[1].to_dict(orient='records') if len(dfs) > 1 and not dfs[1].empty else [],
+            'shot_8ft': dfs[2].to_dict(orient='records') if len(dfs) > 2 and not dfs[2].empty else [],
+            'shot_area': dfs[3].to_dict(orient='records') if len(dfs) > 3 and not dfs[3].empty else [],
+            'assisted_shot': dfs[4].to_dict(orient='records') if len(dfs) > 4 and not dfs[4].empty else [],
+            'shot_type_summary': dfs[5].to_dict(orient='records') if len(dfs) > 5 and not dfs[5].empty else [],
+            'shot_type': dfs[6].to_dict(orient='records') if len(dfs) > 6 and not dfs[6].empty else [],
+            'assisted_by': dfs[7].to_dict(orient='records') if len(dfs) > 7 and not dfs[7].empty else []
+        }
+    except Exception as e:
+        print(f"Error fetching team shot locations: {e}")
+        return {
+            'overall': [],
+            'shot_5ft': [],
+            'shot_8ft': [],
+            'shot_area': [],
+            'assisted_shot': [],
+            'shot_type_summary': [],
+            'shot_type': [],
+            'assisted_by': []
+        }

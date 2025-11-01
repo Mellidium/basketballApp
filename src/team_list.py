@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics, QFont
 from nbaData import get_nba_teams, get_team_id_by_name
+from team_dialogs import show_team_stats_dialog
 
 
 class TeamListApp(QWidget):
@@ -81,8 +82,8 @@ class TeamListApp(QWidget):
             print(f"Team ID not found for {team_name}")
             return
         
-        # TODO: Implement team stats dialog
-        print(f"Selected team: {team_name} (ID: {team_id})")
+        # Show team stats dialog
+        show_team_stats_dialog(self, team_name, team_id)
 
     def update_list(self):
         self.list_widget.clear()
