@@ -1,3 +1,0 @@
-# Product Specs
-
-## Product Description

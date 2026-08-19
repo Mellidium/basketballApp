@@ -1,4 +1,6 @@
-# No dependencies required for Hello World
-PyQt6
-nba_api
-matplotlib
+# Runtime dependencies for the Basketball Stats App.
+# pandas is pulled in transitively by nba_api and is not listed here.
+
+PyQt6>=6.10,<7.0
+nba_api>=1.10,<2.0
+matplotlib>=3.9,<4.0
